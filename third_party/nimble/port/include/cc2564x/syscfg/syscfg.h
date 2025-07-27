@@ -36,11 +36,11 @@
 
 /*** Repository @mcuboot info */
 #ifndef MYNEWT_VAL_REPO_HASH_MCUBOOT
-#define MYNEWT_VAL_REPO_HASH_MCUBOOT "9c99326b9756dbcc35b524636d99ed5f3e6cb29b"
+#define MYNEWT_VAL_REPO_HASH_MCUBOOT "2d61c318933819a0f4954fb2a5a957a62c6128ce"
 #endif
 
 #ifndef MYNEWT_VAL_REPO_VERSION_MCUBOOT
-#define MYNEWT_VAL_REPO_VERSION_MCUBOOT "2.1.0"
+#define MYNEWT_VAL_REPO_VERSION_MCUBOOT "2.2.0"
 #endif
 
 /*** Repository @syscfg info */
@@ -139,10 +139,12 @@
 #define MYNEWT_VAL_FLOAT_USER (0)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-core/kernel/os) */
 #ifndef MYNEWT_VAL_MSYS_1_BLOCK_COUNT
 #define MYNEWT_VAL_MSYS_1_BLOCK_COUNT (35)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-core/kernel/os) */
 #ifndef MYNEWT_VAL_MSYS_1_BLOCK_SIZE
 #define MYNEWT_VAL_MSYS_1_BLOCK_SIZE (304)
 #endif
@@ -694,6 +696,7 @@
 #define MYNEWT_VAL_BLE_GATT_INDICATE (1)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_GATT_MAX_PROCS
 #define MYNEWT_VAL_BLE_GATT_MAX_PROCS (8)
 #endif
@@ -788,12 +791,14 @@
 #define MYNEWT_VAL_BLE_HS_FLOW_CTRL_ITVL (1000)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_HS_FLOW_CTRL_THRESH
-#define MYNEWT_VAL_BLE_HS_FLOW_CTRL_THRESH (2)
+#define MYNEWT_VAL_BLE_HS_FLOW_CTRL_THRESH (5)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_HS_FLOW_CTRL_TX_ON_DISCONNECT
-#define MYNEWT_VAL_BLE_HS_FLOW_CTRL_TX_ON_DISCONNECT (0)
+#define MYNEWT_VAL_BLE_HS_FLOW_CTRL_TX_ON_DISCONNECT (1)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_GAP_UNHANDLED_HCI_EVENT
@@ -885,14 +890,16 @@
 #define MYNEWT_VAL_BLE_SM_CSIS_SIRK (0)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_SM_IO_CAP
-#define MYNEWT_VAL_BLE_SM_IO_CAP (BLE_HS_IO_NO_INPUT_OUTPUT)
+#define MYNEWT_VAL_BLE_SM_IO_CAP (BLE_HS_IO_DISPLAY_YESNO)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_SM_KEYPRESS
 #define MYNEWT_VAL_BLE_SM_KEYPRESS (0)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_SM_LEGACY
 #define MYNEWT_VAL_BLE_SM_LEGACY (1)
 #endif
@@ -1134,18 +1141,19 @@
 #define MYNEWT_VAL_BLE_TRANSPORT (1)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/transport) */
 #ifndef MYNEWT_VAL_BLE_TRANSPORT_ACL_COUNT
-#define MYNEWT_VAL_BLE_TRANSPORT_ACL_COUNT (10)
+#define MYNEWT_VAL_BLE_TRANSPORT_ACL_COUNT (20)
 #endif
 
 /* Value copied from BLE_TRANSPORT_ACL_COUNT */
 #ifndef MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_HS_COUNT
-#define MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_HS_COUNT (10)
+#define MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_HS_COUNT (20)
 #endif
 
-/* Value copied from BLE_TRANSPORT_ACL_COUNT */
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/transport) */
 #ifndef MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_LL_COUNT
-#define MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_LL_COUNT (10)
+#define MYNEWT_VAL_BLE_TRANSPORT_ACL_FROM_LL_COUNT (20)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_TRANSPORT_ACL_SIZE
