@@ -60,6 +60,7 @@ master_capability_set = {
     'HAS_VIBE_AW86225',
     'HAS_PBLBOOT',
     'HAS_DYNAMIC_BACKLIGHT',
+    'WAS_BLUETOPIA',
 }
 
 board_capability_dicts = [
@@ -70,6 +71,7 @@ board_capability_dicts = [
             'HAS_APPLE_MFI',
             'HAS_DEFECTIVE_FW_CRC',
             'HAS_MAGNETOMETER',
+            'WAS_BLUETOPIA',
         },
     },
     {
@@ -80,6 +82,7 @@ board_capability_dicts = [
             'HAS_DEFECTIVE_FW_CRC',
             'HAS_LED',
             'HAS_MAGNETOMETER',
+            'WAS_BLUETOPIA',
         },
     },
     {
@@ -106,6 +109,7 @@ board_capability_dicts = [
             'HAS_VIBE_SCORES',
             'USE_PARALLEL_FLASH',
             'HAS_WEATHER',
+            'WAS_BLUETOPIA',
         },
     },
     {
@@ -133,6 +137,7 @@ board_capability_dicts = [
             'HAS_VIBE_SCORES',
             'USE_PARALLEL_FLASH',
             'HAS_WEATHER',
+            'WAS_BLUETOPIA',
         },
     },
     {
@@ -188,6 +193,7 @@ board_capability_dicts = [
             'HAS_VIBE_SCORES',
             'USE_PARALLEL_FLASH',
             'HAS_WEATHER',
+            'WAS_BLUETOPIA',
         },
     },
     {
@@ -213,6 +219,7 @@ board_capability_dicts = [
             'HAS_VIBE_SCORES',
             'USE_PARALLEL_FLASH',
             'HAS_WEATHER',
+            'WAS_BLUETOPIA',
         },
     },
     {
