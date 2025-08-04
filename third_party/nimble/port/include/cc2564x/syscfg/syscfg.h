@@ -783,8 +783,9 @@
 #define MYNEWT_VAL_BLE_HS_EXT_ADV_LEGACY_INSTANCE (0)
 #endif
 
+/* Overridden by targets/cc2564x (defined by @apache-mynewt-nimble/nimble/host) */
 #ifndef MYNEWT_VAL_BLE_HS_FLOW_CTRL
-#define MYNEWT_VAL_BLE_HS_FLOW_CTRL (0)
+#define MYNEWT_VAL_BLE_HS_FLOW_CTRL (1)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_FLOW_CTRL_ITVL
