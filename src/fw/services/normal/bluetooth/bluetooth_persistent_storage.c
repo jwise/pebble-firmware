@@ -54,8 +54,6 @@
 #  include "services/normal/bluetooth/bluetooth_persistent_storage_v2_impl.h"
 #endif
 
-//! The BtPersistBonding*Data structs can never shrink, only grow
-
 //! Stores data about a remote BT classic device
 typedef struct PACKED {
   BTDeviceAddress addr;
@@ -131,6 +129,26 @@ static PebbleMutex *s_db_mutex = NULL;
 //! Cache of the last connected system session capabilities. Updated in flash when we get new flags
 //! @note prv_lock() must be held when accessing this variable.
 static PebbleProtocolCapabilities s_cached_system_capabilities;
+
+// TODO: extend these to be able to load a legacy BtPersistBondingData from
+// v1 and migrate it, if we wish to.  The old format requires regenerating
+// CSRK / LTK from div/ediv directly, which seems not to be an API that's
+// readily exposed from NimBLE.  For now, we throw away old pairings.
+
+//! Is this val_len any kind of BtPersistBondingData that we support loading?
+static bool prv_val_len_is_bonding(size_t val_len) {
+  // In theory, it was permissible on old PebbleOS to have a smaller
+  // BtPersistBondingData v2 that needed to get zero-padded out to a larger
+  // one, and that was the "versioning"; this check does not check for that. 
+  // In practice, this never happened, so we are OK!
+  return val_len == sizeof(BtPersistBondingData);
+}
+
+//! Load whatever is in this SettingsRecordInfo into a modern BtPersistBondingData structure.
+static void prv_load_pairing_data_from_val(SettingsFile *file, SettingsRecordInfo *info, BtPersistBondingData *data) {
+  PBL_ASSERTN(info->val_len == sizeof(BtPersistBondingData));
+  info->get_val(file, (uint8_t *)data, info->val_len);
+}
 
 static void prv_lock(void) {
   mutex_lock(s_db_mutex);
@@ -354,7 +372,7 @@ static bool prv_any_pinned_ble_pairings_itr(SettingsFile *file,
   if (info->key_len != sizeof(BTBondingID)) {
     return true;
   }
-  if (info->val_len == 0) {
+  if (!prv_val_len_is_bonding(info->val_len)) {
     return true;
   }
 
@@ -362,7 +380,7 @@ static bool prv_any_pinned_ble_pairings_itr(SettingsFile *file,
   info->get_key(file, (uint8_t*) &key, info->key_len);
 
   BtPersistBondingData data;
-  info->get_val(file, &data, sizeof(data));
+  prv_load_pairing_data_from_val(file, info, &data);
   if (data.ble_data.requires_address_pinning) {
     bool *has_pinned_ble_pairings = context;
     *has_pinned_ble_pairings = true;
@@ -555,14 +573,14 @@ typedef struct {
 static bool prv_get_num_pairings_by_type_itr(SettingsFile *file,
                                              SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
   PairingCountItrData *itr_data = (PairingCountItrData *)context;
 
   BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == itr_data->type) {
     itr_data->count++;
@@ -641,7 +659,7 @@ static bool prv_is_pairing_info_equal_identity(const BtPersistLEPairingInfo *a,
 static bool prv_get_key_for_sm_pairing_info_itr(SettingsFile *file,
                                                 SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -649,9 +667,7 @@ static bool prv_get_key_for_sm_pairing_info_itr(SettingsFile *file,
 
   BTBondingID key;
   info->get_key(file, (uint8_t*) &key, info->key_len);
-
-  BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBLE &&
       prv_is_pairing_info_equal_identity(&stored_data.ble_data.pairing_info,
@@ -875,7 +891,7 @@ typedef struct {
 static bool prv_find_by_addr_itr(SettingsFile *file,
                                  SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -883,9 +899,7 @@ static bool prv_find_by_addr_itr(SettingsFile *file,
 
   BTBondingID key;
   info->get_key(file, (uint8_t*) &key, info->key_len);
-
-  BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBLE &&
       bt_device_equal(&itr_data->device.opaque,
@@ -1013,7 +1027,7 @@ bool bt_persistent_storage_get_ble_pinned_address(BTDeviceAddress *address_out) 
 static bool prv_get_first_ancs_bonding_itr(SettingsFile *file,
                                            SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -1023,7 +1037,7 @@ static bool prv_get_first_ancs_bonding_itr(SettingsFile *file,
   info->get_key(file, (uint8_t*) &key, info->key_len);
 
   BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBLE && stored_data.ble_data.supports_ancs) {
     *first_ancs_supported_bonding_found = key;
@@ -1090,7 +1104,7 @@ static void prv_public_for_each_ble_cb(BTBondingID key,
 static bool prv_ble_pairing_internal_for_each_itr(SettingsFile *file,
                                                   SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -1098,9 +1112,7 @@ static bool prv_ble_pairing_internal_for_each_itr(SettingsFile *file,
 
   BTBondingID key;
   info->get_key(file, (uint8_t*) &key, info->key_len);
-
-  BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBLE) {
     internal_itr_data->cb(key, &stored_data, internal_itr_data->cb_data);
@@ -1297,7 +1309,7 @@ typedef struct {
 static bool prv_get_key_for_bt_classic_addr_itr(SettingsFile *file,
                                                 SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -1305,9 +1317,7 @@ static bool prv_get_key_for_bt_classic_addr_itr(SettingsFile *file,
 
   BTBondingID key;
   info->get_key(file, (uint8_t*) &key, info->key_len);
-
-  BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBTClassic &&
       !memcmp(&itr_data->address, &stored_data.bt_classic_data.addr, sizeof(itr_data->address))) {
@@ -1483,7 +1493,7 @@ typedef struct {
 static bool bt_persistent_storage_bt_classic_pairing_for_each_itr(SettingsFile *file,
                                                         SettingsRecordInfo *info, void *context) {
   // check entry is valid
-  if (info->val_len == 0 || info->key_len != sizeof(BTBondingID)) {
+  if (!prv_val_len_is_bonding(info->val_len) || info->key_len != sizeof(BTBondingID)) {
     return true; // continue iterating
   }
 
@@ -1491,9 +1501,7 @@ static bool bt_persistent_storage_bt_classic_pairing_for_each_itr(SettingsFile *
 
   BTBondingID key;
   info->get_key(file, (uint8_t*) &key, info->key_len);
-
-  BtPersistBondingData stored_data;
-  info->get_val(file, (uint8_t*) &stored_data, MIN((unsigned)info->val_len, sizeof(stored_data)));
+  prv_load_pairing_data_from_val(file, info, &stored_data);
 
   if (stored_data.type == BtPersistBondingTypeBTClassic) {
     itr_data->cb(&stored_data.bt_classic_data.addr, &stored_data.bt_classic_data.link_key,
