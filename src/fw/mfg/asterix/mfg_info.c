@@ -17,6 +17,13 @@
 #include "mfg/mfg_info.h"
 #include "drivers/flash.h"
 #include "flash_region/flash_region.h"
+#include "shell/prefs.h"
+
+#if PLATFORM_ASTERIX && !RECOVERY_FW
+static bool prv_should_override() { return shell_prefs_bluetooth_legacy_compat(); }
+#else
+static bool prv_should_override() { return false; }
+#endif
 
 #define CURRENT_DATA_VERSION 0
 
@@ -49,7 +56,11 @@ static MfgData prv_fetch_struct(void) {
 }
 
 WatchInfoColor mfg_info_get_watch_color(void) {
-  return prv_fetch_struct().color;
+  if (prv_should_override()) {
+    return WATCH_INFO_COLOR_PEBBLE_2_SE_BLACK;
+  } else {
+    return prv_fetch_struct().color;
+  }
 }
 
 void mfg_info_set_watch_color(WatchInfoColor color) {
