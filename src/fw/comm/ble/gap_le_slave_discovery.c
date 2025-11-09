@@ -124,7 +124,7 @@ static void prv_schedule_ad_job(void) {
   } mfg_data = {
     .payload_type = 0 /* For future proofing. Only one type for now.*/,
     .hw_platform = prv_should_override() ? FirmwareMetadataPlatformPebbleSilk : TINTIN_METADATA.hw_platform,
-    .color = mfg_info_get_watch_color(),
+    .color = prv_should_override() ? WATCH_INFO_COLOR_PEBBLE_2_SE_BLACK : mfg_info_get_watch_color(),
     .fw_version = {
       .major = GIT_MAJOR_VERSION,
       .minor = GIT_MINOR_VERSION,
