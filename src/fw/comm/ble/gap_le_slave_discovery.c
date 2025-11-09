@@ -42,6 +42,13 @@
 #include <btutil/bt_uuid.h>
 #include <util/attributes.h>
 #include <util/size.h>
+#include "shell/prefs.h"
+
+#if PLATFORM_ASTERIX && !RECOVERY_FW
+static bool prv_should_override() { return shell_prefs_bluetooth_legacy_compat(); }
+#else
+static bool prv_should_override() { return false; }
+#endif
 
 static GAPLEAdvertisingJobRef s_discovery_advert_job;
 
@@ -116,7 +123,7 @@ static void prv_schedule_ad_job(void) {
     };
   } mfg_data = {
     .payload_type = 0 /* For future proofing. Only one type for now.*/,
-    .hw_platform = TINTIN_METADATA.hw_platform,
+    .hw_platform = prv_should_override() ? FirmwareMetadataPlatformPebbleSilk : TINTIN_METADATA.hw_platform,
     .color = mfg_info_get_watch_color(),
     .fw_version = {
       .major = GIT_MAJOR_VERSION,
@@ -131,7 +138,7 @@ static void prv_schedule_ad_job(void) {
          MFG_SERIAL_NUMBER_SIZE);
 
   ble_ad_set_manufacturer_specific_data(ad,
-                                       BT_VENDOR_ID,
+                                       prv_should_override() ? 0x0154 : BT_VENDOR_ID,
                                        (const uint8_t *) &mfg_data,
                                        sizeof(struct ManufacturerSpecificData));
 

@@ -57,3 +57,6 @@
 
   PREFS_MACRO(PREF_KEY_SETTINGS_MENU_HIGHLIGHT_COLOR, s_settings_menu_highlight_color)
   PREFS_MACRO(PREF_KEY_APPS_MENU_HIGHLIGHT_COLOR, s_apps_menu_highlight_color)
+#if PLATFORM_ASTERIX
+  PREFS_MACRO(PREF_KEY_BLUETOOTH_LEGACY_COMPAT, s_bluetooth_legacy_compat)
+#endif

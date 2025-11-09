@@ -78,6 +78,7 @@ enum {
   DebuggingItemALSThreshold,
 #if PLATFORM_ASTERIX || PLATFORM_OBELIX
   DebuggingItemMotionSensitivity,
+  DebuggingItemBluetoothLegacy,
 #endif
 #if CAPABILITY_HAS_DYNAMIC_BACKLIGHT
   DebuggingItemDynamicBacklightMinThreshold,
@@ -596,6 +597,7 @@ static const char* s_debugging_titles[DebuggingItem_Count] = {
   [DebuggingItemALSThreshold]     = i18n_noop("ALS Threshold"),
 #if PLATFORM_ASTERIX || PLATFORM_OBELIX
   [DebuggingItemMotionSensitivity] = i18n_noop("Motion Sensitivity"),
+  [DebuggingItemBluetoothLegacy]  = i18n_noop("BLE compat mode"),
 #endif
 #if CAPABILITY_HAS_DYNAMIC_BACKLIGHT
   [DebuggingItemDynamicBacklightMinThreshold] = i18n_noop("Dyn BL Min Threshold"),
@@ -630,6 +632,8 @@ static void prv_debugging_draw_row_callback(GContext* ctx, const Layer *cell_lay
 #if PLATFORM_ASTERIX || PLATFORM_OBELIX
   else if (cell_index->row == DebuggingItemMotionSensitivity) {
     subtitle_text = i18n_get(s_motion_sensitivity_labels[prv_motion_sensitivity_get_selection_index()], data);
+  } else if (cell_index->row == DebuggingItemBluetoothLegacy) {
+    subtitle_text = shell_prefs_bluetooth_legacy_compat() ? i18n_get("Emulate silk", data) : i18n_get("Disabled", data);
   }
 #endif
 #if CAPABILITY_HAS_DYNAMIC_BACKLIGHT
@@ -680,6 +684,9 @@ static void prv_debugging_select_callback(MenuLayer *menu_layer,
 #if PLATFORM_ASTERIX || PLATFORM_OBELIX
     case DebuggingItemMotionSensitivity:
       prv_motion_sensitivity_menu_push(data);
+      break;
+    case DebuggingItemBluetoothLegacy:
+      shell_prefs_set_bluetooth_legacy_compat(!shell_prefs_bluetooth_legacy_compat());
       break;
 #endif
 #if CAPABILITY_HAS_DYNAMIC_BACKLIGHT

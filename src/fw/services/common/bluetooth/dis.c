@@ -26,6 +26,13 @@
 #include "mfg/mfg_info.h"
 #include "mfg/mfg_serials.h"
 #include "system/version.h"
+#include "shell/prefs.h"
+
+#if PLATFORM_ASTERIX && !RECOVERY_FW
+static bool prv_should_override() { return shell_prefs_bluetooth_legacy_compat(); }
+#else
+static bool prv_should_override() { return false; }
+#endif
 
 _Static_assert(MODEL_NUMBER_LEN  >= MFG_HW_VERSION_SIZE + 1, "Size mismatch");
 _Static_assert(MANUFACTURER_LEN  >= sizeof(BT_VENDOR_NAME), "Size mismatch");
@@ -33,11 +40,15 @@ _Static_assert(SERIAL_NUMBER_LEN >= MFG_SERIAL_NUMBER_SIZE + 1, "Size mismatch")
 _Static_assert(FW_REVISION_LEN   >= sizeof(TINTIN_METADATA.version_tag), "Size mismatch");
 
 static void prv_set_model_number(DisInfo *info) {
-  mfg_info_get_hw_version(info->model_number, MODEL_NUMBER_LEN);
+  if (prv_should_override()) {
+    strcpy(info->model_number, "silk21");
+  } else {
+    mfg_info_get_hw_version(info->model_number, MODEL_NUMBER_LEN);
+  }
 }
 
 static void prv_set_manufacturer_name(DisInfo *info) {
-  strncpy(info->manufacturer, BT_VENDOR_NAME, MANUFACTURER_LEN);
+  strncpy(info->manufacturer, prv_should_override() ? "Pebble Technology" : BT_VENDOR_NAME, MANUFACTURER_LEN);
 }
 
 static void prv_set_serial_number(DisInfo *info) {
