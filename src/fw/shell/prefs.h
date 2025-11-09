@@ -151,3 +151,8 @@ void shell_prefs_set_settings_menu_highlight_color(GColor color);
 
 GColor shell_prefs_get_apps_menu_highlight_color(void);
 void shell_prefs_set_apps_menu_highlight_color(GColor color);
+
+#if PLATFORM_ASTERIX
+bool shell_prefs_bluetooth_legacy_compat(void);
+void shell_prefs_set_bluetooth_legacy_compat(bool enabled);
+#endif
