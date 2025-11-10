@@ -36,7 +36,11 @@ sh.tar("-xvzf", "tzdata-latest.tar.gz")
 tz_file = os.path.join(TZDATA_DIR, "timezones_olson.txt")
 
 # backward goes last so we can just always do backreferences for links
-sh.cat(
+sh.awk(
+    "-v", "DATAFORM=rearguard",
+    "-v", "PACKRATDATA=",
+    "-v", "PACKRATLIST=",
+    "-f", "ziguard.awk",
     "africa",
     "antarctica",
     "asia",
